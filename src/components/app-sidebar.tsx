@@ -56,12 +56,12 @@ export function AppSidebar({
   const subtitle = mode === "formats" ? "AI Repurposing" : "Narrow your search";
 
   return (
-    <aside className="fixed top-16 left-0 z-40 hidden h-[calc(100dvh-4rem)] w-64 flex-col gap-2 border-r border-white/10 bg-background p-4 md:flex">
+    <aside className="fixed top-16 left-0 z-40 hidden h-[calc(100dvh-4rem)] w-64 flex-col gap-2 border-r border-sidebar-border bg-sidebar p-4 md:flex">
       <div className="mb-4 px-3">
-        <h2 className="font-display text-xl font-semibold text-accent-soft">
+        <h2 className="font-display text-xl font-semibold text-sidebar-primary">
           {title}
         </h2>
-        <p className="mt-1 font-mono text-xs text-outline">{subtitle}</p>
+        <p className="mt-1 font-mono text-xs text-muted-foreground">{subtitle}</p>
       </div>
 
       <div className="flex flex-1 flex-col gap-1 overflow-y-auto">
@@ -74,10 +74,10 @@ export function AppSidebar({
                   key={item.id}
                   type="button"
                   onClick={() => onToggleFormat?.(item.id)}
-                  className={`btn-press flex items-center gap-3 rounded-xl px-3 py-2.5 font-mono text-sm transition-all ${
+                  className={`btn-press flex items-center gap-3 rounded-none px-3 py-2.5 font-mono text-sm transition-all ${
                     active
-                      ? "border-l-4 border-secondary bg-[color-mix(in_oklch,var(--secondary)_18%,transparent)] text-[color-mix(in_oklch,var(--secondary)_90%,white)]"
-                      : "border-l-4 border-transparent text-muted hover:bg-surface-high"
+                      ? "border-l-4 border-primary bg-accent text-accent-foreground"
+                      : "border-l-4 border-transparent text-muted-foreground hover:bg-muted"
                   }`}
                 >
                   <Icon size={18} weight={active ? "fill" : "regular"} />
@@ -93,10 +93,10 @@ export function AppSidebar({
                   key={item.id}
                   type="button"
                   onClick={() => onFilterChange?.(item.id)}
-                  className={`btn-press flex items-center gap-3 rounded-xl px-3 py-2.5 font-mono text-sm transition-all ${
+                  className={`btn-press flex items-center gap-3 rounded-none px-3 py-2.5 font-mono text-sm transition-all ${
                     active
-                      ? "border-l-4 border-secondary bg-[color-mix(in_oklch,var(--secondary)_18%,transparent)] text-[color-mix(in_oklch,var(--secondary)_90%,white)]"
-                      : "border-l-4 border-transparent text-muted hover:bg-surface-high"
+                      ? "border-l-4 border-primary bg-accent text-accent-foreground"
+                      : "border-l-4 border-transparent text-muted-foreground hover:bg-muted"
                   }`}
                 >
                   <Icon size={18} weight={active ? "fill" : "regular"} />
@@ -113,10 +113,10 @@ export function AppSidebar({
             <button
               type="button"
               onClick={() => onFilterChange?.("all")}
-              className={`btn-press flex w-full items-center gap-3 rounded-xl px-3 py-2.5 font-mono text-sm transition-all ${
+              className={`btn-press flex w-full items-center gap-3 rounded-none px-3 py-2.5 font-mono text-sm transition-all ${
                 activeFilter === "all"
-                  ? "border-l-4 border-secondary bg-[color-mix(in_oklch,var(--secondary)_18%,transparent)] text-[color-mix(in_oklch,var(--secondary)_90%,white)]"
-                  : "border-l-4 border-transparent text-muted hover:bg-surface-high"
+                  ? "border-l-4 border-primary bg-accent text-accent-foreground"
+                  : "border-l-4 border-transparent text-muted-foreground hover:bg-muted"
               }`}
             >
               <ClockCounterClockwise size={18} />
@@ -129,7 +129,7 @@ export function AppSidebar({
       <div className="mt-auto p-1">
         <Link
           href="/studio"
-          className="btn-press flex w-full items-center justify-center gap-2 rounded-xl bg-[color-mix(in_oklch,var(--secondary)_85%,black)] px-3 py-2.5 font-mono text-sm font-bold text-[oklch(0.18_0.04_210)] transition hover:opacity-90"
+          className="btn-press flex w-full items-center justify-center gap-2 rounded-none bg-primary px-3 py-2.5 font-mono text-sm font-bold text-primary-foreground transition hover:opacity-90"
         >
           <MagicWand size={16} weight="fill" />
           Generate All

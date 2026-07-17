@@ -59,10 +59,10 @@ export function OutputTabs({ formats, results }: OutputTabsProps) {
             key={format}
             type="button"
             onClick={() => setActiveFormat(format)}
-            className={`btn-press rounded-full px-4 py-2 font-mono text-sm font-medium transition ${
+            className={`btn-press rounded-none px-4 py-2 font-mono text-sm font-medium transition ${
               activeFormat === format
-                ? "bg-accent-container text-white"
-                : "bg-surface-high text-muted hover:bg-surface-highest hover:text-foreground"
+                ? "bg-primary text-primary-foreground"
+                : "bg-surface-high text-muted-foreground hover:bg-surface-highest hover:text-foreground"
             }`}
           >
             {FORMAT_LABELS[format]}
@@ -96,7 +96,7 @@ function renderResult(
           {carousel.slides.map((slide, index) => (
             <li
               key={`${index}-${slide.slice(0, 12)}`}
-              className="flex gap-3 rounded-xl border-l-4 border-accent-soft/60 bg-surface px-4 py-3"
+              className="flex gap-3 rounded-none border-l-4 border-accent-soft/60 bg-surface px-4 py-3"
             >
               <span className="font-mono text-xs font-bold text-accent-soft">
                 {String(index + 1).padStart(2, "0")}
@@ -115,7 +115,7 @@ function renderResult(
           {hooks.items.map((item, index) => (
             <li
               key={`${index}-${item.slice(0, 12)}`}
-              className="rounded-xl border border-white/5 bg-surface-high px-4 py-3 italic text-foreground"
+              className="rounded-none border border-border bg-surface-high px-4 py-3 italic text-foreground"
             >
               {item}
             </li>
@@ -131,7 +131,7 @@ function renderResult(
           {caption.variants.map((variant, index) => (
             <div
               key={`${index}-${variant.text.slice(0, 12)}`}
-              className="rounded-xl bg-surface px-4 py-3"
+              className="rounded-none bg-surface px-4 py-3"
             >
               <span className="mb-2 block font-mono text-[11px] font-semibold uppercase tracking-wider text-outline">
                 Option {String.fromCharCode(65 + index)}
@@ -160,10 +160,10 @@ function renderResult(
     case "thread": {
       const thread = result as ThreadResult;
       return (
-        <div className="divide-y divide-white/10 overflow-hidden rounded-xl border border-white/10 bg-surface-high">
+        <div className="divide-y divide-border overflow-hidden rounded-none border border-border bg-surface-high">
           {thread.tweets.map((tweet, index) => (
             <div key={`${index}-${tweet.slice(0, 12)}`} className="flex gap-3 p-4">
-              <span className="shrink-0 font-mono text-xs text-secondary">
+              <span className="shrink-0 font-mono text-xs text-primary">
                 {index + 1}/{thread.tweets.length}
               </span>
               <p className="text-foreground">{tweet}</p>

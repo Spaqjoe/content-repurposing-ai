@@ -44,10 +44,10 @@ export function FormatSelector({ selected, onChange }: FormatSelectorProps) {
               key={format}
               type="button"
               onClick={() => toggleFormat(format)}
-              className={`btn-press rounded-xl border px-4 py-3 text-left transition ${
+              className={`btn-press rounded-none border px-4 py-3 text-left transition ${
                 active
-                  ? "border-[color-mix(in_oklch,var(--accent)_60%,transparent)] bg-accent-container/15 shadow-[0_0_16px_rgba(124,58,237,0.15)]"
-                  : "border-white/10 bg-surface hover:border-white/20"
+                  ? "border-[color-mix(in_oklch,var(--primary)_60%,transparent)] bg-accent "
+                  : "border-border bg-surface hover:border-border"
               }`}
             >
               <div className="flex items-center justify-between gap-3">
@@ -56,11 +56,11 @@ export function FormatSelector({ selected, onChange }: FormatSelectorProps) {
                 </span>
                 <span
                   className={`h-2.5 w-2.5 rounded-full ${
-                    active ? "bg-accent-soft" : "bg-surface-highest"
+                    active ? "bg-primary" : "bg-surface-highest"
                   }`}
                 />
               </div>
-              <p className="mt-1 text-xs leading-5 text-muted">
+              <p className="mt-1 text-xs leading-5 text-muted-foreground">
                 {FORMAT_DESCRIPTIONS[format]}
               </p>
             </button>

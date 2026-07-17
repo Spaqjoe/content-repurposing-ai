@@ -30,9 +30,9 @@ export function CopyButton({
     <button
       type="button"
       onClick={handleCopy}
-      className={`btn-press inline-flex items-center gap-2 rounded-full border border-white/10 bg-surface-high px-3 py-1.5 font-mono text-xs font-medium text-muted transition hover:border-[color-mix(in_oklch,var(--accent)_40%,transparent)] hover:text-accent-soft ${className}`}
+      className={`btn-press inline-flex items-center gap-2 rounded-none border border-border bg-surface-high px-3 py-1.5 font-mono text-xs font-medium text-muted-foreground transition hover:border-[color-mix(in_oklch,var(--accent)_40%,transparent)] hover:text-accent-soft ${className}`}
     >
-      {copied ? <Check size={14} weight="bold" className="text-secondary" /> : <Copy size={14} />}
+      {copied ? <Check size={14} weight="bold" className="text-primary" /> : <Copy size={14} />}
       {copied ? "Copied" : label}
     </button>
   );

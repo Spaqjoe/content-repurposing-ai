@@ -23,7 +23,6 @@
   },
   "devDependencies": {
     "@cloudflare/workers-types": "^5.20260717.1",
-    "@fontsource-variable/inter": "^5.2.8",
     "@tailwindcss/postcss": "^4",
     "@types/node": "^20",
     "@types/react": "^19",

@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Geist, JetBrains_Mono } from "next/font/google";
 import { SiteHeader } from "@/components/site-header";
+import { ThemeProvider } from "@/components/theme-provider";
 import "./globals.css";
 
 const geistSans = Geist({
@@ -20,6 +21,19 @@ export const metadata: Metadata = {
     "Turn one source into carousel outlines, Reel hooks, captions, and more with Content AI.",
 };
 
+const themeInitScript = `
+(() => {
+  try {
+    const stored = localStorage.getItem("content-ai-theme");
+    const theme = stored === "light" || stored === "dark"
+      ? stored
+      : (window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light");
+    document.documentElement.classList.toggle("dark", theme === "dark");
+    document.documentElement.style.colorScheme = theme;
+  } catch {}
+})();
+`;
+
 export default function RootLayout({
   children,
 }: Readonly<{
@@ -28,11 +42,17 @@ export default function RootLayout({
   return (
     <html
       lang="en"
-      className={`${geistSans.variable} ${jetbrainsMono.variable} dark h-full antialiased`}
+      className={`${geistSans.variable} ${jetbrainsMono.variable} h-full antialiased`}
+      suppressHydrationWarning
     >
+      <head>
+        <script dangerouslySetInnerHTML={{ __html: themeInitScript }} />
+      </head>
       <body className="min-h-full bg-background text-foreground">
-        <SiteHeader />
-        <main className="min-h-[calc(100dvh-4rem)] pt-16">{children}</main>
+        <ThemeProvider>
+          <SiteHeader />
+          <main className="min-h-[calc(100dvh-4rem)] pt-16">{children}</main>
+        </ThemeProvider>
       </body>
     </html>
   );

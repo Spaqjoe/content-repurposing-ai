@@ -9,9 +9,9 @@ interface ResultCardProps {
 }
 
 const BADGE_STYLES = {
-  primary: "bg-accent-container/30 text-accent-soft",
-  secondary: "bg-[color-mix(in_oklch,var(--secondary)_20%,transparent)] text-secondary-soft",
-  tertiary: "bg-[oklch(0.45_0.12_340_/0.3)] text-[oklch(0.85_0.08_340)]",
+  primary: "bg-primary/15 text-primary",
+  secondary: "bg-accent text-accent-foreground",
+  tertiary: "bg-primary/15 text-primary",
 } as const;
 
 export function ResultCard({
@@ -22,12 +22,12 @@ export function ResultCard({
   badgeTone = "primary",
 }: ResultCardProps) {
   return (
-    <article className="glass-panel group rounded-xl p-5 transition hover:shadow-[0_0_20px_rgba(210,187,255,0.12)]">
+    <article className="glass-panel group rounded-none p-5 transition hover:shadow-[0_0_20px_color-mix(in oklch, var(--primary) 18%, transparent)]">
       <div className="mb-4 flex items-start justify-between gap-3">
         <div>
           {badge ? (
             <span
-              className={`mb-1.5 inline-block rounded px-2 py-0.5 font-mono text-[11px] font-medium ${BADGE_STYLES[badgeTone]}`}
+              className={`mb-1.5 inline-block rounded-none px-2 py-0.5 font-mono text-[11px] font-medium ${BADGE_STYLES[badgeTone]}`}
             >
               {badge}
             </span>
@@ -38,7 +38,7 @@ export function ResultCard({
         </div>
         {copyValue ? <CopyButton value={copyValue} /> : null}
       </div>
-      <div className="space-y-3 text-sm leading-6 text-muted">{children}</div>
+      <div className="space-y-3 text-sm leading-6 text-muted-foreground">{children}</div>
     </article>
   );
 }

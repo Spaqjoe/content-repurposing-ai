@@ -30,7 +30,7 @@ export function ToneSelector({
           id="tone"
           value={tone}
           onChange={(event) => onToneChange(event.target.value as Tone)}
-          className="input-field w-full rounded-xl px-4 py-3 text-sm"
+          className="input-field w-full rounded-none px-4 py-3 text-sm"
         >
           {SUPPORTED_TONES.map((option) => (
             <option key={option} value={option}>
@@ -53,7 +53,7 @@ export function ToneSelector({
           onChange={(event) =>
             onCtaStyleChange(event.target.value as CtaStyle)
           }
-          className="input-field w-full rounded-xl px-4 py-3 text-sm"
+          className="input-field w-full rounded-none px-4 py-3 text-sm"
         >
           {SUPPORTED_CTA_STYLES.map((option) => (
             <option key={option} value={option}>

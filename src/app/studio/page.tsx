@@ -1,6 +1,8 @@
 "use client";
 
 import { useState } from "react";
+import { FileText, MagicWand } from "@phosphor-icons/react";
+import { AppSidebar } from "@/components/app-sidebar";
 import { EmptyState } from "@/components/empty-state";
 import { ErrorState } from "@/components/error-state";
 import { FormatSelector } from "@/components/format-selector";
@@ -255,23 +257,36 @@ export default function StudioPage() {
     setExtractError(null);
   }
 
+  function handleToggleFormat(formatId: string) {
+    const format = formatId as ContentFormat;
+    if (formats.includes(format)) {
+      setFormats(formats.filter((item) => item !== format));
+      return;
+    }
+    setFormats([...formats, format]);
+  }
+
   const hasResults = Object.keys(results).length > 0;
+  const resultCount = Object.keys(results).length;
 
   return (
-    <div className="mx-auto max-w-6xl px-4 py-8 sm:px-6 lg:py-10">
-      <div className="mb-8 max-w-2xl">
-        <h1 className="text-3xl font-semibold tracking-tight text-zinc-900">
-          Studio
-        </h1>
-        <p className="mt-2 text-sm leading-6 text-zinc-600">
-          Paste text, drop in a YouTube URL, or upload a video — then choose your
-          formats and generate structured content you can copy straight into your
-          workflow.
-        </p>
-      </div>
+    <div className="flex min-h-[calc(100dvh-4rem)]">
+      <AppSidebar
+        mode="formats"
+        selectedFormats={formats}
+        onToggleFormat={handleToggleFormat}
+      />
 
-      <div className="grid gap-8 lg:grid-cols-[minmax(0,1fr)_minmax(0,1.1fr)]">
-        <section className="space-y-6 rounded-3xl border border-zinc-200 bg-white p-6 shadow-sm">
+      <div className="flex w-full flex-1 flex-col md:ml-64 md:flex-row">
+        {/* Left: Source */}
+        <section className="flex w-full flex-col gap-4 border-b border-border p-4 md:w-1/3 md:border-r md:border-b-0 md:p-6">
+          <div className="flex items-center gap-2">
+            <FileText size={20} weight="fill" className="text-accent-soft" />
+            <h1 className="font-display text-xl font-semibold text-foreground">
+              Source Content
+            </h1>
+          </div>
+
           <SourceInput
             value={sourceContent}
             onChange={setSourceContent}
@@ -283,6 +298,7 @@ export default function StudioPage() {
             onExtractYoutube={handleExtractYoutube}
             onUploadFile={handleUploadFile}
           />
+
           <FormatSelector selected={formats} onChange={setFormats} />
           <ToneSelector
             tone={tone}
@@ -291,76 +307,115 @@ export default function StudioPage() {
             onCtaStyleChange={setCtaStyle}
           />
 
-          <div className="flex flex-col gap-3 sm:flex-row">
-            <button
-              type="button"
-              onClick={handleGenerate}
-              disabled={
-                isLoading ||
-                isExtracting ||
-                !sourceContent.trim() ||
-                formats.length === 0
-              }
-              className="inline-flex flex-1 items-center justify-center rounded-full bg-violet-600 px-6 py-3 text-sm font-medium text-white transition hover:bg-violet-700 disabled:cursor-not-allowed disabled:bg-violet-300"
-            >
-              {isLoading ? "Generating..." : "Generate content"}
-            </button>
+          <div className="glass-panel rounded-none p-4">
+            <p className="mb-2 font-mono text-[11px] uppercase tracking-wider text-outline">
+              AI Settings
+            </p>
+            <div className="flex items-center justify-between py-1">
+              <span className="font-mono text-sm text-muted-foreground">Creative Tone</span>
+              <span className="font-mono text-sm font-bold capitalize text-primary">
+                {tone}
+              </span>
+            </div>
+            <div className="flex items-center justify-between py-1">
+              <span className="font-mono text-sm text-muted-foreground">CTA Style</span>
+              <span className="font-mono text-sm font-bold capitalize text-primary">
+                {ctaStyle}
+              </span>
+            </div>
           </div>
+
+          <button
+            type="button"
+            onClick={handleGenerate}
+            disabled={
+              isLoading ||
+              isExtracting ||
+              !sourceContent.trim() ||
+              formats.length === 0
+            }
+            className="btn-press flex w-full items-center justify-center gap-2 rounded-none bg-primary px-6 py-3.5 font-mono text-sm font-semibold text-primary-foreground transition hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-50"
+          >
+            <MagicWand size={18} weight="fill" />
+            {isLoading ? "Generating..." : "Generate Outputs"}
+          </button>
         </section>
 
-        <section className="space-y-4">
-          {restored && hasResults ? (
-            <div className="rounded-2xl border border-violet-200 bg-violet-50 px-4 py-3 text-sm text-violet-800">
-              Restored your last successful generation from this browser.
-            </div>
-          ) : null}
-
-          {error ? <ErrorState message={error} onRetry={handleGenerate} /> : null}
-
-          {saveMessage ? (
-            <div
-              className={`rounded-2xl border px-4 py-3 text-sm ${
-                saveIsError
-                  ? "border-red-200 bg-red-50 text-red-800"
-                  : "border-emerald-200 bg-emerald-50 text-emerald-800"
-              }`}
-            >
-              {saveMessage}
-            </div>
-          ) : null}
-
-          {isLoading || isExtracting ? (
-            <LoadingState
-              message={
-                isExtracting
-                  ? "Extracting transcript from your source..."
-                  : "Generating carousel, hooks, and captions..."
-              }
-            />
-          ) : hasResults ? (
-            <div className="space-y-4">
-              <div className="flex flex-col gap-3 sm:flex-row sm:justify-end">
-                <button
-                  type="button"
-                  onClick={handleSaveResult}
-                  disabled={isSaving}
-                  className="inline-flex items-center justify-center rounded-full border border-violet-200 bg-violet-50 px-5 py-2.5 text-sm font-medium text-violet-700 transition hover:border-violet-300 hover:bg-violet-100 disabled:cursor-not-allowed disabled:opacity-60"
-                >
-                  {isSaving ? "Saving..." : "Save result"}
-                </button>
-                <button
-                  type="button"
-                  onClick={handleGenerateNew}
-                  className="inline-flex items-center justify-center rounded-full bg-violet-600 px-5 py-2.5 text-sm font-medium text-white transition hover:bg-violet-700"
-                >
-                  Generate new
-                </button>
+        {/* Right: Outputs */}
+        <section className="custom-scrollbar flex-1 overflow-y-auto bg-muted/40 p-4 md:p-6">
+          <div className="mx-auto flex max-w-5xl flex-col gap-6">
+            <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+              <div>
+                <h2 className="font-display text-2xl font-bold text-foreground">
+                  Studio Output
+                </h2>
+                <p className="mt-1 text-sm text-outline">
+                  {hasResults
+                    ? `Generated ${resultCount} format${resultCount === 1 ? "" : "s"} based on your source.`
+                    : "Your generated formats will show up here."}
+                </p>
               </div>
-              <OutputTabs formats={formats} results={results} />
+              <div className="inline-flex items-center gap-2 rounded-none border border-border bg-card px-3 py-1.5">
+                <span className="h-2 w-2 rounded-full bg-primary" />
+                <span className="font-mono text-[11px] font-bold tracking-wider text-primary uppercase">
+                  AI Engine Ready
+                </span>
+              </div>
             </div>
-          ) : (
-            <EmptyState />
-          )}
+
+            {restored && hasResults ? (
+              <div className="rounded-none border border-[color-mix(in_oklch,var(--accent)_30%,transparent)] bg-accent-container/15 px-4 py-3 text-sm text-accent-soft">
+                Restored your last successful generation from this browser.
+              </div>
+            ) : null}
+
+            {error ? <ErrorState message={error} onRetry={handleGenerate} /> : null}
+
+            {saveMessage ? (
+              <div
+                className={`rounded-none border px-4 py-3 text-sm ${
+                  saveIsError
+                    ? "border-destructive/40 bg-destructive/10 text-destructive"
+                    : "border-primary/30 bg-accent text-accent-foreground"
+                }`}
+              >
+                {saveMessage}
+              </div>
+            ) : null}
+
+            {isLoading || isExtracting ? (
+              <LoadingState
+                message={
+                  isExtracting
+                    ? "Extracting transcript from your source..."
+                    : "Generating carousel, hooks, and captions..."
+                }
+              />
+            ) : hasResults ? (
+              <div className="space-y-4">
+                <div className="flex flex-col gap-3 sm:flex-row sm:justify-end">
+                  <button
+                    type="button"
+                    onClick={handleSaveResult}
+                    disabled={isSaving}
+                    className="btn-press inline-flex items-center justify-center rounded-none border border-primary/35 bg-accent px-5 py-2.5 text-sm font-medium text-accent-foreground transition hover:bg-accent/80 disabled:cursor-not-allowed disabled:opacity-60"
+                  >
+                    {isSaving ? "Saving..." : "Save result"}
+                  </button>
+                  <button
+                    type="button"
+                    onClick={handleGenerateNew}
+                    className="btn-press inline-flex items-center justify-center rounded-none bg-primary px-5 py-2.5 text-sm font-medium text-primary-foreground transition hover:opacity-90"
+                  >
+                    Generate new
+                  </button>
+                </div>
+                <OutputTabs formats={formats} results={results} />
+              </div>
+            ) : (
+              <EmptyState />
+            )}
+          </div>
         </section>
       </div>
     </div>
