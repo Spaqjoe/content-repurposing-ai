@@ -10,26 +10,76 @@ import {
   Camera,
   FilmStrip,
   TextAlignLeft,
+  X,
 } from "@phosphor-icons/react";
 import { AppSidebar, PlatformFilter } from "@/components/app-sidebar";
 import { CopyButton } from "@/components/copy-button";
 import { EmptyState } from "@/components/empty-state";
 import { ErrorState } from "@/components/error-state";
+import { renderResult } from "@/components/format-renderer";
 import { LoadingState } from "@/components/loading-state";
+import { formatResultForCopy } from "@/lib/formatters";
 import {
   loadLocalHistory,
   mergeHistoryRecords,
   toHistoryRecord,
 } from "@/lib/storage";
-import { HistoryRecord } from "@/lib/types";
+import {
+  ContentFormat,
+  FORMAT_LABELS,
+  FormatResults,
+  HistoryRecord,
+  SUPPORTED_FORMATS,
+} from "@/lib/types";
+
+function parseFormats(formatsJson: string): ContentFormat[] {
+  try {
+    const parsed = JSON.parse(formatsJson) as unknown;
+    if (!Array.isArray(parsed)) {
+      return [];
+    }
+    return parsed.filter((format): format is ContentFormat =>
+      SUPPORTED_FORMATS.includes(format as ContentFormat),
+    );
+  } catch {
+    return [];
+  }
+}
+
+function parseResults(resultsJson: string): FormatResults {
+  try {
+    return JSON.parse(resultsJson) as FormatResults;
+  } catch {
+    return {};
+  }
+}
+
+function buildCopyAll(formats: ContentFormat[], results: FormatResults): string {
+  return formats
+    .filter((format) => results[format])
+    .map((format) => {
+      const result = results[format];
+      if (!result) {
+        return "";
+      }
+      return `## ${FORMAT_LABELS[format]}\n\n${formatResultForCopy(format, result)}`;
+    })
+    .filter(Boolean)
+    .join("\n\n---\n\n");
+}
 
 export default function HistoryPage() {
   const [records, setRecords] = useState<HistoryRecord[]>([]);
-  const [expandedId, setExpandedId] = useState<string | null>(null);
+  const [viewingId, setViewingId] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [activeFilter, setActiveFilter] = useState<PlatformFilter>("all");
   const [toastVisible, setToastVisible] = useState(false);
+
+  const viewingRecord = useMemo(
+    () => records.find((record) => record.id === viewingId) ?? null,
+    [records, viewingId],
+  );
 
   useEffect(() => {
     async function loadHistory() {
@@ -89,10 +139,31 @@ export default function HistoryPage() {
     });
   }, [records, activeFilter]);
 
+  useEffect(() => {
+    if (!viewingId) {
+      return;
+    }
+
+    function handleKeyDown(event: KeyboardEvent) {
+      if (event.key === "Escape") {
+        setViewingId(null);
+      }
+    }
+
+    const previousOverflow = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    window.addEventListener("keydown", handleKeyDown);
+
+    return () => {
+      document.body.style.overflow = previousOverflow;
+      window.removeEventListener("keydown", handleKeyDown);
+    };
+  }, [viewingId]);
+
   function handleDelete(id: string) {
     setRecords((prev) => prev.filter((record) => record.id !== id));
-    if (expandedId === id) {
-      setExpandedId(null);
+    if (viewingId === id) {
+      setViewingId(null);
     }
     setToastVisible(true);
     window.setTimeout(() => setToastVisible(false), 3500);
@@ -203,8 +274,10 @@ export default function HistoryPage() {
         ) : (
           <div className="grid grid-cols-1 gap-4 lg:grid-cols-2 2xl:grid-cols-3">
             {filteredRecords.map((record) => {
-              const expanded = expandedId === record.id;
               const count = formatCount(record.formats_json);
+              const formats = parseFormats(record.formats_json);
+              const results = parseResults(record.results_json);
+              const copyAll = buildCopyAll(formats, results);
 
               return (
                 <article
@@ -236,15 +309,16 @@ export default function HistoryPage() {
                   <div className="mt-auto flex gap-3">
                     <button
                       type="button"
-                      onClick={() =>
-                        setExpandedId(expanded ? null : record.id)
-                      }
+                      onClick={() => setViewingId(record.id)}
                       className="btn-press flex flex-1 items-center justify-center gap-2 rounded-none bg-surface-highest py-2.5 font-mono text-sm text-muted-foreground transition hover:bg-primary hover:text-primary-foreground"
                     >
                       <Eye size={16} />
-                      {expanded ? "Hide" : "View"}
+                      View
                     </button>
-                    <CopyButton value={record.results_json} label="JSON" />
+                    <CopyButton
+                      value={copyAll || record.results_json}
+                      label="Copy All"
+                    />
                     <button
                       type="button"
                       onClick={() => handleDelete(record.id)}
@@ -254,12 +328,6 @@ export default function HistoryPage() {
                       <Trash size={16} />
                     </button>
                   </div>
-
-                  {expanded ? (
-                    <pre className="overflow-x-auto rounded-none bg-muted p-4 font-mono text-xs leading-6 text-muted-foreground">
-                      {JSON.stringify(JSON.parse(record.results_json), null, 2)}
-                    </pre>
-                  ) : null}
                 </article>
               );
             })}
@@ -289,6 +357,106 @@ export default function HistoryPage() {
         <span className="text-sm text-foreground">
           Generation removed from view.
         </span>
+      </div>
+
+      {viewingRecord ? (
+        <HistoryDetailDialog
+          record={viewingRecord}
+          onClose={() => setViewingId(null)}
+        />
+      ) : null}
+    </div>
+  );
+}
+
+function HistoryDetailDialog({
+  record,
+  onClose,
+}: {
+  record: HistoryRecord;
+  onClose: () => void;
+}) {
+  const formats = parseFormats(record.formats_json);
+  const results = parseResults(record.results_json);
+  const copyAll = buildCopyAll(formats, results);
+  const availableFormats = formats.filter((format) => results[format]);
+
+  return (
+    <div
+      className="fixed inset-0 z-[60] flex items-end justify-center p-0 sm:items-center sm:p-6"
+      role="presentation"
+    >
+      <button
+        type="button"
+        aria-label="Close dialog"
+        className="absolute inset-0 bg-background/70 backdrop-blur-sm"
+        onClick={onClose}
+      />
+
+      <div
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="history-detail-title"
+        className="glass-panel relative z-10 flex max-h-[90dvh] w-full max-w-3xl flex-col overflow-hidden rounded-none border border-border shadow-2xl"
+      >
+        <header className="flex shrink-0 items-start justify-between gap-4 border-b border-border px-5 py-4 sm:px-6">
+          <div className="min-w-0">
+            <h2
+              id="history-detail-title"
+              className="font-display text-xl font-semibold text-foreground sm:text-2xl"
+            >
+              {record.summary ?? "Generated content"}
+            </h2>
+            <p className="mt-1 font-mono text-xs text-outline">
+              Saved {new Date(record.created_at).toLocaleString()}
+            </p>
+          </div>
+          <div className="flex shrink-0 items-center gap-2">
+            <CopyButton value={copyAll || record.results_json} label="Copy All" />
+            <button
+              type="button"
+              onClick={onClose}
+              className="btn-press rounded-none border border-border bg-surface-high p-2 text-muted-foreground transition hover:text-foreground"
+              aria-label="Close"
+            >
+              <X size={18} />
+            </button>
+          </div>
+        </header>
+
+        <div className="min-h-0 flex-1 space-y-6 overflow-y-auto px-5 py-5 sm:px-6">
+          <p className="text-sm leading-6 text-muted-foreground">
+            {record.source_content}
+          </p>
+
+          {availableFormats.length === 0 ? (
+            <p className="text-sm text-muted-foreground">
+              No formatted results available for this generation.
+            </p>
+          ) : (
+            availableFormats.map((format) => {
+              const result = results[format];
+              if (!result) {
+                return null;
+              }
+
+              return (
+                <section key={format} className="space-y-3">
+                  <div className="flex items-center justify-between gap-3">
+                    <h3 className="font-mono text-xs font-semibold uppercase tracking-wider text-outline">
+                      {FORMAT_LABELS[format]}
+                    </h3>
+                    <CopyButton
+                      value={formatResultForCopy(format, result)}
+                      label="Copy"
+                    />
+                  </div>
+                  {renderResult(format, result)}
+                </section>
+              );
+            })
+          )}
+        </div>
       </div>
     </div>
   );

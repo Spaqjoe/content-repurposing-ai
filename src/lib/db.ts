@@ -46,7 +46,11 @@ export async function saveGenerationToD1(
 
       return id;
     } catch (error) {
-      console.warn("Remote D1 save failed. Using browser history only.", error);
+      console.warn(
+        `Remote D1 save failed. Using browser history only. (${
+          error instanceof Error ? error.message : "Unknown remote D1 error"
+        })`,
+      );
     }
   }
 
@@ -81,7 +85,11 @@ export async function getRecentGenerations(
         [limit],
       );
     } catch (error) {
-      console.warn("Remote D1 history fetch failed. Using browser history only.", error);
+      const message =
+        error instanceof Error ? error.message : "Unknown remote D1 error";
+      console.warn(
+        `Remote D1 history fetch failed. Using browser history only. (${message})`,
+      );
     }
   }
 

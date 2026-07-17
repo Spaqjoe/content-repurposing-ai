@@ -167,6 +167,28 @@
     -webkit-font-smoothing: antialiased;
   }
 
+  a,
+  button,
+  [role="button"],
+  summary,
+  label[for],
+  select,
+  input[type="button"],
+  input[type="submit"],
+  input[type="reset"],
+  input[type="checkbox"],
+  input[type="radio"],
+  input[type="file"] {
+    cursor: pointer;
+  }
+
+  button:disabled,
+  [aria-disabled="true"],
+  input:disabled,
+  select:disabled {
+    cursor: not-allowed;
+  }
+
   ::selection {
     background: color-mix(in oklch, var(--primary) 45%, transparent);
     color: var(--primary-foreground);
