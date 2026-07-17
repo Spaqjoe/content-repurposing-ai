@@ -6,10 +6,17 @@ import {
 } from "./types";
 import { buildPromptMessages } from "./prompts";
 import { parseFormatResult } from "./formatters";
+import { runWorkersAiRest, WorkersAiRestError } from "./workers-ai-rest";
 
 type AiMessage = {
   role: "system" | "user" | "assistant";
   content: string;
+};
+
+type ChatCompletionResult = {
+  response?: string;
+  text?: string;
+  content?: string;
 };
 
 function extractResponseText(response: unknown): string {
@@ -23,6 +30,23 @@ function extractResponseText(response: unknown): string {
 
   if (typeof response === "object") {
     const record = response as Record<string, unknown>;
+
+    if (record.response && typeof record.response === "object") {
+      return JSON.stringify(record.response);
+    }
+
+    const choices = record.choices;
+    if (Array.isArray(choices) && choices.length > 0) {
+      const firstChoice = choices[0] as Record<string, unknown>;
+      const message = firstChoice.message;
+      if (message && typeof message === "object") {
+        const content = (message as Record<string, unknown>).content;
+        if (typeof content === "string" && content.trim()) {
+          return content;
+        }
+      }
+    }
+
     if (typeof record.response === "string") {
       return record.response;
     }
@@ -37,59 +61,39 @@ function extractResponseText(response: unknown): string {
   return JSON.stringify(response);
 }
 
-function buildMockResult(format: ContentFormat, sourceContent: string) {
-  const snippet = sourceContent.slice(0, 120);
+async function runChatCompletion(
+  ai: Ai | undefined,
+  messages: AiMessage[],
+): Promise<string> {
+  if (ai) {
+    const response = await ai.run(AI_MODEL, {
+      messages,
+      max_tokens: 1024,
+      temperature: 0.3,
+    });
 
-  switch (format) {
-    case "carousel":
-      return {
-        slides: [
-          `Hook: ${snippet}`,
-          "Break down the core insight in one clear sentence.",
-          "Share a practical example your audience can relate to.",
-          "Explain why this matters right now.",
-          "Give one actionable takeaway.",
-          "Invite your audience to save, share, or try it today.",
-        ],
-      };
-    case "hooks":
-      return {
-        items: [
-          `Most creators miss this about ${snippet.slice(0, 40)}...`,
-          "Stop rewriting from scratch every time you post.",
-          "One idea can become five posts if you repurpose it right.",
-          "This is the fastest way to stay consistent without burnout.",
-          "If your content feels random, start here.",
-        ],
-      };
-    case "caption":
-      return {
-        variants: [
-          {
-            text: `Here's the idea in one line: ${snippet}\n\nTurn one source into multiple posts and save hours every week.`,
-            hashtags: ["#ContentAI", "#CreatorTools", "#RepurposeContent"],
-          },
-          {
-            text: `Creators don't need more ideas—they need better workflows.\n\n${snippet}`,
-            hashtags: ["#ContentStrategy", "#SocialMediaTips"],
-          },
-        ],
-      };
-    case "linkedin":
-      return {
-        post: `Most creators treat every post like a blank page.\n\n${snippet}\n\nThe better workflow: capture one strong idea, then repurpose it across formats.\n\nThat's how you stay consistent without burning out.`,
-      };
-    case "thread":
-      return {
-        tweets: [
-          `Creators: one strong idea can become a week of content.\n\nHere's how to repurpose ${snippet.slice(0, 60)}... 🧵`,
-          "Start with one source: a note, article, or voice memo.",
-          "Extract the hook, the insight, and the takeaway.",
-          "Turn those into carousel slides, hooks, and captions.",
-          "Publish faster without losing quality.",
-        ],
-      };
+    return extractResponseText(response);
   }
+
+  const response = await runWorkersAiRest<
+    {
+      messages: AiMessage[];
+      max_tokens: number;
+      temperature: number;
+    },
+    ChatCompletionResult
+  >(AI_MODEL, {
+    messages,
+    max_tokens: 1024,
+    temperature: 0.3,
+  });
+
+  const rawText = extractResponseText(response);
+  if (!rawText.trim()) {
+    throw new WorkersAiRestError("The AI model returned an empty response.");
+  }
+
+  return rawText;
 }
 
 export async function generateFormatResult(
@@ -97,10 +101,6 @@ export async function generateFormatResult(
   request: GenerationRequest,
   format: ContentFormat,
 ): Promise<NonNullable<FormatResults[ContentFormat]>> {
-  if (!ai) {
-    return buildMockResult(format, request.sourceContent);
-  }
-
   const messages = buildPromptMessages(
     format,
     request.sourceContent,
@@ -108,13 +108,7 @@ export async function generateFormatResult(
     request.ctaStyle,
   ) as AiMessage[];
 
-  const response = await ai.run(AI_MODEL, {
-    messages,
-    max_tokens: 1024,
-    temperature: 0.7,
-  });
-
-  const rawText = extractResponseText(response);
+  const rawText = await runChatCompletion(ai, messages);
   return parseFormatResult(format, rawText) as NonNullable<
     FormatResults[ContentFormat]
   >;

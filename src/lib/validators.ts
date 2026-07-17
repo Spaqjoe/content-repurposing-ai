@@ -1,13 +1,17 @@
 import {
+  ContentFormat,
   CtaStyle,
+  FormatResults,
   GenerationRequest,
   MAX_SOURCE_LENGTH,
+  MAX_UPLOAD_BYTES,
   SUPPORTED_CTA_STYLES,
   SUPPORTED_FORMATS,
   SUPPORTED_TONES,
+  SUPPORTED_UPLOAD_MIME_TYPES,
   Tone,
-  ContentFormat,
 } from "./types";
+import { extractYouTubeVideoId } from "./youtube";
 
 export class ValidationError extends Error {
   constructor(message: string) {
@@ -101,4 +105,83 @@ export function validateGenerationRequest(body: unknown): GenerationRequest {
     tone: normalizeTone(payload.tone),
     ctaStyle: normalizeCtaStyle(payload.ctaStyle),
   };
+}
+
+export function validateSaveRequest(body: unknown): {
+  request: GenerationRequest;
+  results: FormatResults;
+} {
+  if (!body || typeof body !== "object") {
+    throw new ValidationError("Request body must be a JSON object.");
+  }
+
+  const payload = body as Record<string, unknown>;
+  const request = validateGenerationRequest(payload);
+
+  if (!payload.results || typeof payload.results !== "object") {
+    throw new ValidationError("Results are required to save.");
+  }
+
+  const results = payload.results as FormatResults;
+  if (Object.keys(results).length === 0) {
+    throw new ValidationError("Nothing to save yet. Generate content first.");
+  }
+
+  return { request, results };
+}
+
+export function validateYouTubeIngestRequest(body: unknown): { url: string } {
+  if (!body || typeof body !== "object") {
+    throw new ValidationError("Request body must be a JSON object.");
+  }
+
+  const payload = body as Record<string, unknown>;
+  const url = String(payload.url ?? "").trim();
+
+  if (!url) {
+    throw new ValidationError("YouTube URL is required.");
+  }
+
+  if (!extractYouTubeVideoId(url)) {
+    throw new ValidationError("Enter a valid YouTube URL or video ID.");
+  }
+
+  return { url };
+}
+
+export function validateUploadFile(file: unknown): File {
+  if (!(file instanceof File)) {
+    throw new ValidationError("Upload a video or audio file to transcribe.");
+  }
+
+  if (file.size === 0) {
+    throw new ValidationError("The uploaded file is empty.");
+  }
+
+  if (file.size > MAX_UPLOAD_BYTES) {
+    throw new ValidationError("File must be 25 MB or smaller.");
+  }
+
+  const mimeType = file.type.toLowerCase();
+  const isSupportedMime = SUPPORTED_UPLOAD_MIME_TYPES.some(
+    (type) => type === mimeType,
+  );
+  const isSupportedExtension = /\.(mp3|mp4|m4a|wav|webm|mov|ogg)$/i.test(file.name);
+
+  if (!isSupportedMime && !isSupportedExtension) {
+    throw new ValidationError(
+      "Unsupported file type. Upload MP3, MP4, WAV, WEBM, MOV, M4A, or OGG.",
+    );
+  }
+
+  return file;
+}
+
+export function truncateSourceContent(value: string): string {
+  const normalized = sanitizeText(value);
+  if (normalized.length <= MAX_SOURCE_LENGTH) {
+    return normalized;
+  }
+
+  return `${normalized.slice(0, MAX_SOURCE_LENGTH - 33).trim()}… [transcript truncated]`;
 }

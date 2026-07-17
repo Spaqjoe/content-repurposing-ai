@@ -42,6 +42,24 @@ function asStringArray(value: unknown): string[] {
     .filter(Boolean);
 }
 
+function extractJsonStringField(text: string, field: string): string | null {
+  const marker = `"${field}":"`;
+  const start = text.indexOf(marker);
+  if (start === -1) {
+    return null;
+  }
+
+  let content = text.slice(start + marker.length).trimEnd();
+  if (content.endsWith('"}')) {
+    content = content.slice(0, -2);
+  } else if (content.endsWith('"')) {
+    content = content.slice(0, -1);
+  }
+
+  const cleaned = content.replace(/\\n/g, "\n").replace(/\\"/g, '"').trim();
+  return cleaned || null;
+}
+
 export function parseFormatResult(
   format: ContentFormat,
   rawText: string,
@@ -101,10 +119,23 @@ export function parseFormatResult(
       }
 
       case "linkedin": {
-        const post = String(parsed.post ?? "").trim();
+        let post = String(parsed.post ?? "").trim();
+
+        if (post.startsWith("{")) {
+          try {
+            const nested = JSON.parse(post) as { post?: string };
+            if (typeof nested.post === "string" && nested.post.trim()) {
+              post = nested.post.trim();
+            }
+          } catch {
+            // Keep the original post text.
+          }
+        }
+
         if (!post) {
           throw new Error("Missing LinkedIn post.");
         }
+
         return { post } satisfies LinkedInResult;
       }
 
@@ -117,6 +148,13 @@ export function parseFormatResult(
       }
     }
   } catch {
+    if (format === "linkedin") {
+      const post = extractJsonStringField(rawText, "post");
+      if (post) {
+        return { post } satisfies LinkedInResult;
+      }
+    }
+
     return getFallbackResult(format, rawText);
   }
 }

@@ -27,7 +27,10 @@ function baseSystemPrompt(tone: Tone, ctaStyle: CtaStyle): string {
     "You are Content AI, a creator-focused repurposing assistant.",
     TONE_DIRECTIVES[tone],
     CTA_DIRECTIVES[ctaStyle],
+    "Repurpose the provided source content directly. Use its ideas, facts, and wording.",
+    "Do not give generic advice about repurposing or content creation.",
     "Return ONLY valid JSON with no markdown fences or commentary.",
+    "Use \\n for line breaks inside JSON string values. Never use literal newlines inside JSON strings.",
   ].join(" ");
 }
 
@@ -118,7 +121,7 @@ Requirements:
 - End with a thoughtful CTA if appropriate
 
 Return JSON in this exact shape:
-{"post":"LinkedIn post text"}
+{"post":"Opening line\\n\\nSecond paragraph\\n\\nClosing CTA"}
 
 Source content:
 ${sourceContent}`,

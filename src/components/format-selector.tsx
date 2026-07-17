@@ -30,8 +30,8 @@ export function FormatSelector({ selected, onChange }: FormatSelectorProps) {
   return (
     <div className="space-y-3">
       <div>
-        <h3 className="text-sm font-medium text-zinc-900">Output formats</h3>
-        <p className="text-xs text-zinc-500">
+        <h3 className="text-sm font-medium text-foreground">Output formats</h3>
+        <p className="text-xs text-outline">
           Choose one or more formats to generate from the same source.
         </p>
       </div>
@@ -44,23 +44,23 @@ export function FormatSelector({ selected, onChange }: FormatSelectorProps) {
               key={format}
               type="button"
               onClick={() => toggleFormat(format)}
-              className={`rounded-2xl border px-4 py-3 text-left transition ${
+              className={`btn-press rounded-xl border px-4 py-3 text-left transition ${
                 active
-                  ? "border-violet-500 bg-violet-50 shadow-sm"
-                  : "border-zinc-200 bg-white hover:border-zinc-300"
+                  ? "border-[color-mix(in_oklch,var(--accent)_60%,transparent)] bg-accent-container/15 shadow-[0_0_16px_rgba(124,58,237,0.15)]"
+                  : "border-white/10 bg-surface hover:border-white/20"
               }`}
             >
               <div className="flex items-center justify-between gap-3">
-                <span className="text-sm font-medium text-zinc-900">
+                <span className="text-sm font-medium text-foreground">
                   {FORMAT_LABELS[format]}
                 </span>
                 <span
                   className={`h-2.5 w-2.5 rounded-full ${
-                    active ? "bg-violet-500" : "bg-zinc-200"
+                    active ? "bg-accent-soft" : "bg-surface-highest"
                   }`}
                 />
               </div>
-              <p className="mt-1 text-xs leading-5 text-zinc-500">
+              <p className="mt-1 text-xs leading-5 text-muted">
                 {FORMAT_DESCRIPTIONS[format]}
               </p>
             </button>

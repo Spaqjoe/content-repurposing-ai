@@ -23,14 +23,14 @@ export function ToneSelector({
   return (
     <div className="grid gap-4 sm:grid-cols-2">
       <div className="space-y-2">
-        <label htmlFor="tone" className="text-sm font-medium text-zinc-900">
+        <label htmlFor="tone" className="text-sm font-medium text-foreground">
           Tone
         </label>
         <select
           id="tone"
           value={tone}
           onChange={(event) => onToneChange(event.target.value as Tone)}
-          className="w-full rounded-2xl border border-zinc-200 bg-white px-4 py-3 text-sm text-zinc-900 outline-none transition focus:border-violet-400 focus:ring-4 focus:ring-violet-100"
+          className="input-field w-full rounded-xl px-4 py-3 text-sm"
         >
           {SUPPORTED_TONES.map((option) => (
             <option key={option} value={option}>
@@ -41,7 +41,10 @@ export function ToneSelector({
       </div>
 
       <div className="space-y-2">
-        <label htmlFor="cta-style" className="text-sm font-medium text-zinc-900">
+        <label
+          htmlFor="cta-style"
+          className="text-sm font-medium text-foreground"
+        >
           CTA style
         </label>
         <select
@@ -50,7 +53,7 @@ export function ToneSelector({
           onChange={(event) =>
             onCtaStyleChange(event.target.value as CtaStyle)
           }
-          className="w-full rounded-2xl border border-zinc-200 bg-white px-4 py-3 text-sm text-zinc-900 outline-none transition focus:border-violet-400 focus:ring-4 focus:ring-violet-100"
+          className="input-field w-full rounded-xl px-4 py-3 text-sm"
         >
           {SUPPORTED_CTA_STYLES.map((option) => (
             <option key={option} value={option}>

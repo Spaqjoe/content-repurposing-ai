@@ -111,3 +111,30 @@ export const CTA_LABELS: Record<CtaStyle, string> = {
 export const MAX_SOURCE_LENGTH = 5000;
 
 export const AI_MODEL = "@cf/meta/llama-3.3-70b-instruct-fp8-fast";
+export const WHISPER_MODEL = "@cf/openai/whisper-large-v3-turbo";
+
+export const SOURCE_MODES = ["text", "youtube", "upload"] as const;
+export type SourceMode = (typeof SOURCE_MODES)[number];
+
+export const MAX_UPLOAD_BYTES = 25 * 1024 * 1024;
+
+export const SUPPORTED_UPLOAD_MIME_TYPES = [
+  "audio/mpeg",
+  "audio/mp3",
+  "audio/wav",
+  "audio/x-wav",
+  "audio/mp4",
+  "audio/webm",
+  "audio/ogg",
+  "video/mp4",
+  "video/webm",
+  "video/quicktime",
+  "video/x-m4v",
+] as const;
+
+export interface IngestResponse {
+  success: boolean;
+  sourceContent?: string;
+  sourceLabel?: string;
+  error?: string;
+}

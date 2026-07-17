@@ -14,16 +14,13 @@ export async function GET() {
   } catch (error) {
     console.error("History fetch failed:", error);
 
-    return NextResponse.json(
-      {
-        success: false,
-        records: [],
-        error:
-          error instanceof Error
-            ? error.message
-            : "Unable to load generation history.",
-      },
-      { status: 500 },
-    );
+    return NextResponse.json({
+      success: true,
+      records: [],
+      warning:
+        error instanceof Error
+          ? error.message
+          : "Unable to load remote generation history.",
+    });
   }
 }

@@ -1,25 +1,170 @@
 @import "tailwindcss";
 
 :root {
-  --background: #fafafa;
-  --foreground: #18181b;
-  --accent: #7c3aed;
-  --accent-soft: #ede9fe;
+  --background: oklch(0.13 0.03 265);
+  --foreground: oklch(0.92 0.02 265);
+  --surface: oklch(0.17 0.025 265);
+  --surface-high: oklch(0.22 0.02 265);
+  --surface-highest: oklch(0.26 0.02 265);
+  --muted: oklch(0.72 0.02 265);
+  --outline: oklch(0.62 0.03 290);
+  --accent: oklch(0.55 0.25 285);
+  --accent-soft: oklch(0.82 0.08 290);
+  --accent-container: #7c3aed;
+  --secondary: oklch(0.75 0.15 200);
+  --secondary-soft: oklch(0.85 0.1 200);
+  --error: oklch(0.75 0.12 25);
+  --error-container: oklch(0.35 0.12 25);
+  --border: rgba(255, 255, 255, 0.08);
+  --border-strong: rgba(255, 255, 255, 0.12);
+  --ease-out: cubic-bezier(0.23, 1, 0.32, 1);
+  --ease-in-out: cubic-bezier(0.77, 0, 0.175, 1);
 }
 
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
+  --color-surface: var(--surface);
+  --color-surface-high: var(--surface-high);
+  --color-surface-highest: var(--surface-highest);
+  --color-muted: var(--muted);
+  --color-outline: var(--outline);
+  --color-accent: var(--accent);
+  --color-accent-soft: var(--accent-soft);
+  --color-accent-container: var(--accent-container);
+  --color-secondary: var(--secondary);
+  --color-secondary-soft: var(--secondary-soft);
+  --color-error: var(--error);
+  --color-error-container: var(--error-container);
+  --color-border: var(--border);
   --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  --font-mono: var(--font-jetbrains-mono);
+  --font-display: var(--font-geist-sans);
+}
+
+* {
+  border-color: var(--border);
 }
 
 body {
   background: var(--background);
   color: var(--foreground);
   font-family: var(--font-geist-sans), system-ui, sans-serif;
+  -webkit-font-smoothing: antialiased;
 }
 
 ::selection {
-  background: #ddd6fe;
+  background: color-mix(in oklch, var(--accent-container) 55%, transparent);
+  color: white;
+}
+
+.glass-panel {
+  background: rgba(15, 23, 42, 0.7);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid var(--border-strong);
+}
+
+.glass-card {
+  background: rgba(23, 31, 51, 0.6);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  transition:
+    transform 200ms var(--ease-out),
+    border-color 200ms var(--ease-out),
+    background 200ms var(--ease-out);
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .glass-card:hover {
+    border-top-color: color-mix(in oklch, var(--secondary) 50%, transparent);
+    background: rgba(23, 31, 51, 0.9);
+    transform: translateY(-2px);
+  }
+}
+
+.btn-press {
+  transition: transform 160ms var(--ease-out);
+}
+
+.btn-press:active {
+  transform: scale(0.97);
+}
+
+.input-field {
+  background: var(--surface);
+  border: 1px solid var(--border-strong);
+  color: var(--foreground);
+  outline: none;
+  transition:
+    border-color 200ms var(--ease-out),
+    box-shadow 200ms var(--ease-out);
+}
+
+.input-field::placeholder {
+  color: color-mix(in oklch, var(--muted) 55%, transparent);
+}
+
+.input-field:focus {
+  border-color: color-mix(in oklch, var(--secondary) 55%, transparent);
+  box-shadow: 0 0 0 3px color-mix(in oklch, var(--secondary) 20%, transparent);
+}
+
+.custom-scrollbar::-webkit-scrollbar {
+  width: 4px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  background: var(--surface-highest);
+  border-radius: 10px;
+}
+
+@keyframes shimmer {
+  0% {
+    background-position: -200% 0;
+  }
+  100% {
+    background-position: 200% 0;
+  }
+}
+
+.skeleton-shimmer {
+  background: linear-gradient(
+    90deg,
+    var(--surface) 0%,
+    var(--surface-high) 50%,
+    var(--surface) 100%
+  );
+  background-size: 200% 100%;
+  animation: shimmer 1.6s var(--ease-in-out) infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .skeleton-shimmer {
+    animation: none;
+  }
+
+  .glass-card,
+  .btn-press {
+    transition: none;
+  }
+
+  .glass-card:hover {
+    transform: none;
+  }
+
+  .btn-press:active {
+    transform: none;
+  }
+}
+
+@media (prefers-reduced-transparency: reduce) {
+  .glass-panel {
+    background: var(--surface);
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+  }
 }

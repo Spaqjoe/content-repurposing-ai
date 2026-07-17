@@ -6,6 +6,11 @@ import { CopyButton } from "@/components/copy-button";
 import { EmptyState } from "@/components/empty-state";
 import { ErrorState } from "@/components/error-state";
 import { LoadingState } from "@/components/loading-state";
+import {
+  loadLocalHistory,
+  mergeHistoryRecords,
+  toHistoryRecord,
+} from "@/lib/storage";
 import { HistoryRecord } from "@/lib/types";
 
 export default function HistoryPage() {
@@ -28,13 +33,19 @@ export default function HistoryPage() {
           throw new Error(data.error ?? "Unable to load history.");
         }
 
-        setRecords(data.records);
+        const localRecords = loadLocalHistory().map(toHistoryRecord);
+        setRecords(mergeHistoryRecords(data.records, localRecords));
       } catch (historyError) {
-        setError(
-          historyError instanceof Error
-            ? historyError.message
-            : "Unable to load history.",
-        );
+        const localRecords = loadLocalHistory().map(toHistoryRecord);
+        if (localRecords.length > 0) {
+          setRecords(localRecords);
+        } else {
+          setError(
+            historyError instanceof Error
+              ? historyError.message
+              : "Unable to load history.",
+          );
+        }
       } finally {
         setIsLoading(false);
       }
@@ -51,7 +62,7 @@ export default function HistoryPage() {
             History
           </h1>
           <p className="mt-2 text-sm leading-6 text-zinc-600">
-            Recent generations saved to Cloudflare D1 when available.
+            Saved generations from this browser and Cloudflare D1 when available.
           </p>
         </div>
         <Link

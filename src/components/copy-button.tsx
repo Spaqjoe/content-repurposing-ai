@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { Check, Copy } from "@phosphor-icons/react";
 
 interface CopyButtonProps {
   value: string;
@@ -29,8 +30,9 @@ export function CopyButton({
     <button
       type="button"
       onClick={handleCopy}
-      className={`inline-flex items-center gap-2 rounded-full border border-zinc-200 bg-white px-3 py-1.5 text-xs font-medium text-zinc-700 transition hover:border-violet-300 hover:text-violet-700 ${className}`}
+      className={`btn-press inline-flex items-center gap-2 rounded-full border border-white/10 bg-surface-high px-3 py-1.5 font-mono text-xs font-medium text-muted transition hover:border-[color-mix(in_oklch,var(--accent)_40%,transparent)] hover:text-accent-soft ${className}`}
     >
+      {copied ? <Check size={14} weight="bold" className="text-secondary" /> : <Copy size={14} />}
       {copied ? "Copied" : label}
     </button>
   );

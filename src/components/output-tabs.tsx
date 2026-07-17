@@ -19,6 +19,17 @@ interface OutputTabsProps {
   results: FormatResults;
 }
 
+const BADGE_MAP: Record<
+  ContentFormat,
+  { label: string; tone: "primary" | "secondary" | "tertiary" }
+> = {
+  carousel: { label: "Carousel Outline", tone: "tertiary" },
+  hooks: { label: "Reel Hooks", tone: "secondary" },
+  caption: { label: "Post Captions", tone: "primary" },
+  linkedin: { label: "LinkedIn", tone: "secondary" },
+  thread: { label: "X Thread", tone: "tertiary" },
+};
+
 export function OutputTabs({ formats, results }: OutputTabsProps) {
   const availableFormats = formats.filter((format) => results[format]);
   const [activeFormat, setActiveFormat] = useState<ContentFormat>(
@@ -38,6 +49,8 @@ export function OutputTabs({ formats, results }: OutputTabsProps) {
     return null;
   }
 
+  const badge = BADGE_MAP[activeFormat];
+
   return (
     <div className="space-y-4">
       <div className="flex flex-wrap gap-2">
@@ -46,10 +59,10 @@ export function OutputTabs({ formats, results }: OutputTabsProps) {
             key={format}
             type="button"
             onClick={() => setActiveFormat(format)}
-            className={`rounded-full px-4 py-2 text-sm font-medium transition ${
+            className={`btn-press rounded-full px-4 py-2 font-mono text-sm font-medium transition ${
               activeFormat === format
-                ? "bg-violet-600 text-white"
-                : "bg-zinc-100 text-zinc-600 hover:bg-zinc-200"
+                ? "bg-accent-container text-white"
+                : "bg-surface-high text-muted hover:bg-surface-highest hover:text-foreground"
             }`}
           >
             {FORMAT_LABELS[format]}
@@ -58,7 +71,12 @@ export function OutputTabs({ formats, results }: OutputTabsProps) {
       </div>
 
       {activeResult ? (
-        <ResultCard title={FORMAT_LABELS[activeFormat]} copyValue={copyValue}>
+        <ResultCard
+          title={FORMAT_LABELS[activeFormat]}
+          copyValue={copyValue}
+          badge={badge.label}
+          badgeTone={badge.tone}
+        >
           {renderResult(activeFormat, activeResult)}
         </ResultCard>
       ) : null}
@@ -78,12 +96,12 @@ function renderResult(
           {carousel.slides.map((slide, index) => (
             <li
               key={`${index}-${slide.slice(0, 12)}`}
-              className="rounded-xl bg-zinc-50 px-4 py-3"
+              className="flex gap-3 rounded-xl border-l-4 border-accent-soft/60 bg-surface px-4 py-3"
             >
-              <span className="mb-1 block text-xs font-semibold uppercase tracking-wide text-violet-600">
-                Slide {index + 1}
+              <span className="font-mono text-xs font-bold text-accent-soft">
+                {String(index + 1).padStart(2, "0")}
               </span>
-              {slide}
+              <span className="text-foreground">{slide}</span>
             </li>
           ))}
         </ol>
@@ -97,11 +115,8 @@ function renderResult(
           {hooks.items.map((item, index) => (
             <li
               key={`${index}-${item.slice(0, 12)}`}
-              className="rounded-xl bg-zinc-50 px-4 py-3"
+              className="rounded-xl border border-white/5 bg-surface-high px-4 py-3 italic text-foreground"
             >
-              <span className="mr-2 font-semibold text-violet-600">
-                {index + 1}.
-              </span>
               {item}
             </li>
           ))}
@@ -116,14 +131,16 @@ function renderResult(
           {caption.variants.map((variant, index) => (
             <div
               key={`${index}-${variant.text.slice(0, 12)}`}
-              className="rounded-xl bg-zinc-50 px-4 py-3"
+              className="rounded-xl bg-surface px-4 py-3"
             >
-              <span className="mb-2 block text-xs font-semibold uppercase tracking-wide text-violet-600">
-                Variant {index + 1}
+              <span className="mb-2 block font-mono text-[11px] font-semibold uppercase tracking-wider text-outline">
+                Option {String.fromCharCode(65 + index)}
               </span>
-              <p className="whitespace-pre-wrap">{variant.text}</p>
+              <p className="whitespace-pre-wrap text-foreground">
+                {variant.text}
+              </p>
               {variant.hashtags?.length ? (
-                <p className="mt-3 text-xs text-violet-700">
+                <p className="mt-3 text-xs text-accent-soft">
                   {variant.hashtags.join(" ")}
                 </p>
               ) : null}
@@ -135,22 +152,21 @@ function renderResult(
 
     case "linkedin": {
       const linkedin = result as LinkedInResult;
-      return <p className="whitespace-pre-wrap">{linkedin.post}</p>;
+      return (
+        <p className="whitespace-pre-wrap text-foreground">{linkedin.post}</p>
+      );
     }
 
     case "thread": {
       const thread = result as ThreadResult;
       return (
-        <div className="space-y-3">
+        <div className="divide-y divide-white/10 overflow-hidden rounded-xl border border-white/10 bg-surface-high">
           {thread.tweets.map((tweet, index) => (
-            <div
-              key={`${index}-${tweet.slice(0, 12)}`}
-              className="rounded-xl bg-zinc-50 px-4 py-3"
-            >
-              <span className="mb-1 block text-xs font-semibold uppercase tracking-wide text-violet-600">
-                Tweet {index + 1}
+            <div key={`${index}-${tweet.slice(0, 12)}`} className="flex gap-3 p-4">
+              <span className="shrink-0 font-mono text-xs text-secondary">
+                {index + 1}/{thread.tweets.length}
               </span>
-              {tweet}
+              <p className="text-foreground">{tweet}</p>
             </div>
           ))}
         </div>

@@ -1,3 +1,7 @@
+"use client";
+
+import { WarningCircle } from "@phosphor-icons/react";
+
 interface ErrorStateProps {
   message: string;
   onRetry?: () => void;
@@ -5,18 +9,29 @@ interface ErrorStateProps {
 
 export function ErrorState({ message, onRetry }: ErrorStateProps) {
   return (
-    <div className="rounded-3xl border border-red-200 bg-red-50 px-5 py-4">
-      <h3 className="text-sm font-semibold text-red-800">Generation failed</h3>
-      <p className="mt-1 text-sm leading-6 text-red-700">{message}</p>
-      {onRetry ? (
-        <button
-          type="button"
-          onClick={onRetry}
-          className="mt-4 rounded-full bg-red-700 px-4 py-2 text-xs font-medium text-white transition hover:bg-red-800"
-        >
-          Try again
-        </button>
-      ) : null}
+    <div className="rounded-xl border border-[color-mix(in_oklch,var(--error)_35%,transparent)] bg-error-container/40 px-5 py-4">
+      <div className="flex items-start gap-3">
+        <WarningCircle
+          size={20}
+          weight="fill"
+          className="mt-0.5 shrink-0 text-error"
+        />
+        <div>
+          <h3 className="text-sm font-semibold text-error">Generation failed</h3>
+          <p className="mt-1 text-sm leading-6 text-[color-mix(in_oklch,var(--error)_85%,white)]">
+            {message}
+          </p>
+          {onRetry ? (
+            <button
+              type="button"
+              onClick={onRetry}
+              className="btn-press mt-4 rounded-full bg-error px-4 py-2 text-xs font-medium text-[oklch(0.2_0.05_25)] transition hover:opacity-90"
+            >
+              Try again
+            </button>
+          ) : null}
+        </div>
+      </div>
     </div>
   );
 }
