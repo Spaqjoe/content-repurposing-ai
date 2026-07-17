@@ -3,10 +3,13 @@
 Creator-focused AI repurposing studio built with **Next.js**, **Cloudflare Workers**, **Workers AI**, and **D1**.
 
 Turn one source into platform-ready outputs:
+
 - Instagram carousel outlines
 - Reel hooks
 - Post captions
 - Optional LinkedIn post or X thread
+
+![Content AI Studio — paste source content, pick formats, and generate platform-ready outputs](docs/studio.png)
 
 ## Stack
 
@@ -142,17 +145,15 @@ Response:
 ## MVP scope
 
 Included:
+
 - Landing page and studio workflow
 - Structured AI generation for multiple formats
 - Copy actions and local restore
 - Optional D1-backed history page
 
 Not included in v1:
+
 - Authentication
 - Payments / credits
 - URL/audio/video ingestion
 - Collaboration and review workflows
-
-## MLH Fellowship framing
-
-Content AI is positioned as the first slice of a larger creator productivity platform: a focused, production-minded MVP that demonstrates product thinking, clean engineering, and a realistic path to a full repurposing studio.

@@ -1,6 +1,7 @@
 {
 	"$schema": "node_modules/wrangler/config-schema.json",
 	"name": "content-ai",
+	"account_id": "3a7628c1affc184f4f9c7e1437f5e346",
 	"main": ".open-next/worker.js",
 	"compatibility_date": "2025-04-01",
 	"compatibility_flags": [
