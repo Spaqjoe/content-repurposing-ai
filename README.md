@@ -155,5 +155,4 @@ Not included in v1:
 
 - Authentication
 - Payments / credits
-- URL/audio/video ingestion
 - Collaboration and review workflows
