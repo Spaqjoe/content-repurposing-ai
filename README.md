@@ -2,6 +2,8 @@
 
 Creator-focused AI repurposing studio built with **Next.js**, **Cloudflare Workers**, **Workers AI**, and **D1**.
 
+**[Visit App](https://content-ai.smartboe1234.workers.dev/)**
+
 Turn one source into platform-ready outputs:
 
 - Instagram carousel outlines
